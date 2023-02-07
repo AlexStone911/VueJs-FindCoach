@@ -3,22 +3,24 @@
         <div v-if="show"
              @click="tryClose"
              class="backdrop"></div>
-        <dialog open
-                v-if="show">
-            <header>
-                <slot name="header">
-                    <h2>{{ title }}</h2>
-                </slot>
-            </header>
-            <section>
-                <slot></slot>
-            </section>
-            <menu v-if="!fixed">
-                <slot name="actions">
-                    <base-button @click="tryClose">Close</base-button>
-                </slot>
-            </menu>
-        </dialog>
+        <transition name="dialog">
+            <dialog open
+                    v-if="show">
+                <header>
+                    <slot name="header">
+                        <h2>{{ title }}</h2>
+                    </slot>
+                </header>
+                <section>
+                    <slot></slot>
+                </section>
+                <menu v-if="!fixed">
+                    <slot name="actions">
+                        <base-button @click="tryClose">Close</base-button>
+                    </slot>
+                </menu>
+            </dialog>
+        </transition>
     </teleport>
 </template>
 
@@ -60,6 +62,26 @@ export default {
     width: 100%;
     background-color: rgba(0, 0, 0, 0.75);
     z-index: 10;
+}
+
+.dialog-enter-from,
+.dialog-leave-to {
+    opacity: 0;
+    transform: scale(0.8);
+}
+
+.dialog-enter-to,
+.dialog-leave-from {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.dialog-enter-active {
+    transition: all 0.3s ease-out;
+}
+
+.dialog-leave-active {
+    transition: all 0.3s ease-in;
 }
 
 dialog {
