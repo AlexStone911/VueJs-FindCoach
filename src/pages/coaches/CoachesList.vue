@@ -58,7 +58,6 @@ export default {
         filtereCoaches() {
             const coaches = this.$store.getters['coaches/coaches']
             return coaches.filter(coach => {
-                console.log(coach);
                 if (this.activeFilters.frontend && coach.areas.includes('frontend')) {
                     return true;
                 }
