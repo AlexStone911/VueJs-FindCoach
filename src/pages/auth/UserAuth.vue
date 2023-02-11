@@ -1,25 +1,38 @@
 <template>
-    <base-card>
-        <form @submit.prevent="submitForm">
-            <div class="form-control">
-                <label for="email">E-mail</label>
-                <input type="email"
-                       id="email"
-                       v-model.trim="email">
-            </div>
-            <div class="form-control">
-                <label for="password">Password</label>
-                <input type="password"
-                       id="password"
-                       v-model.trim="password">
-            </div>
-            <p v-if="!formIsValid">Please, enter a valid login/password</p>
-            <base-button>{{ submitButtonCaption }}</base-button>
-            <base-button type="button"
-                         @click="switchAuthMode"
-                         mode="flat">{{ switchModeButtonCaption }}</base-button>
-        </form>
-    </base-card>
+    <div>
+        <base-dialog :show="!!error"
+                     title="An error occured..."
+                     @close="handleError">
+            <p>{{ error }}</p>
+        </base-dialog>
+        <base-dialog :show="isLoading"
+                     title="Authenticating..."
+                     fixed>
+            <p>Authenticating...</p>
+            <base-spinner></base-spinner>
+        </base-dialog>
+        <base-card>
+            <form @submit.prevent="submitForm">
+                <div class="form-control">
+                    <label for="email">E-mail</label>
+                    <input type="email"
+                           id="email"
+                           v-model.trim="email">
+                </div>
+                <div class="form-control">
+                    <label for="password">Password</label>
+                    <input type="password"
+                           id="password"
+                           v-model.trim="password">
+                </div>
+                <p v-if="!formIsValid">Please, enter a valid login/password</p>
+                <base-button>{{ submitButtonCaption }}</base-button>
+                <base-button type="button"
+                             @click="switchAuthMode"
+                             mode="flat">{{ switchModeButtonCaption }}</base-button>
+            </form>
+        </base-card>
+    </div>
 </template>
 
 <script>
@@ -29,7 +42,9 @@ export default {
             email: '',
             password: '',
             formIsValid: true,
-            mode: 'login'
+            mode: 'login',
+            isLoading: false,
+            error: null
         }
     },
     computed: {
@@ -49,13 +64,31 @@ export default {
         }
     },
     methods: {
-        submitForm() {
+        async submitForm() {
             this.formIsValid = true;
 
             if (this.email === '' || !this.email.includes('@') || this.password.length < 6) {
                 this.formIsValid = false;
                 return;
             }
+
+            this.isLoading = true;
+
+            try {
+                if (this.mode === 'login') {
+                    // ...
+                } else {
+                    await this.$store.dispatch('signup', {
+                        email: this.email,
+                        password: this.password
+                    })
+                }
+            } catch (error) {
+                this.error = error.message || 'Failed to auth.';
+            }
+
+
+            this.isLoading = false;
         },
         switchAuthMode() {
             if (this.mode === 'login') {
@@ -64,8 +97,10 @@ export default {
                 this.mode = 'login';
             }
 
+        },
+        handleError() {
+            this.error = null;
         }
-
     }
 }
 </script>
